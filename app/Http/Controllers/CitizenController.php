@@ -1,71 +1,55 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\City;
 use Illuminate\Http\Request;
+use App\Models\Citizen;
 
 class CitizenController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $req)
+    public function index(Request $request)
     {
-        $collection = Citizen::with('city')
-            ->when($req->q, fn($q)=>$q->where('name','like',"%$req->q%"))
-            ->when($req->city, fn($q)=>$q->whereHas('city',
-                   fn($q2)=>$q2->where('name','like',"%{$req->city}%")))
+        $search = $request->input('search');
+
+        $citizens = Citizen::with('city')
+            ->when($search, fn($q) => $q->where('name', 'like', "%$search%"))
             ->orderBy('name')
-            ->paginate(15)->withQueryString();
-        return view('citizens.index', ['citizens'=>$collection]);
+            ->get();
+
+        $cities = City::orderBy('name')->get();
+
+        return view('ciudadanos.index', compact('citizens', 'cities', 'search'));
     }
 
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|max:255',
+            'city_id' => 'required|exists:cities,id'
+        ]);
+
+        Citizen::create($request->all());
+
+        return redirect()->route('ciudadanos.index')->with('success', 'Ciudadano agregado.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function update(Request $request, Citizen $ciudadano)
     {
-        //
+        $request->validate([
+            'name' => 'required|max:255',
+            'city_id' => 'required|exists:cities,id'
+        ]);
+
+        $ciudadano->update($request->all());
+
+        return redirect()->route('ciudadanos.index')->with('success', 'Ciudadano actualizado.');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function destroy(Citizen $ciudadano)
     {
-        //
+        $ciudadano->delete();
+
+        return redirect()->route('ciudadanos.index')->with('success', 'Ciudadano eliminado.');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
 }

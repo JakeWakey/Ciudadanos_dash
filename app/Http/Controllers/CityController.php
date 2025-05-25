@@ -4,65 +4,55 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
+use App\Models\City;
+
 class CityController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index()
     {
-        //
+        $cities = City::orderBy('name')->get();
+        return view('ciudades.index', compact('cities'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return view('ciudades.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|unique:cities,name|max:255'
+        ]);
+
+        City::create($request->all());
+        return redirect()->route('ciudades.index')->with('success', 'Ciudad creada correctamente.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function edit(City $ciudad)
     {
-        //
+        return view('ciudades.edit', ['ciudad' => $ciudad]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function update(Request $request, City $ciudad)
     {
-        //
+        $request->validate([
+            'name' => 'required|max:255|unique:cities,name,' . $ciudad->id
+        ]);
+
+        $ciudad->update($request->all());
+        return redirect()->route('ciudades.index')->with('success', 'Ciudad actualizada.');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function destroy(City $ciudad)
     {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(City $city)
-    {
-        if ($city->citizens()->exists()) {
-            return back()->with('error', 'No se puede eliminar: la ciudad posee ciudadanos.');
+        if ($ciudad->citizens()->exists()) {
+            return redirect()->route('ciudades.index')->with('error', 'No se puede eliminar una ciudad con ciudadanos.');
         }
-        $city->delete();
-        return back()->with('success', 'Ciudad eliminada');
+
+        $ciudad->delete();
+        return redirect()->route('ciudades.index')->with('success', 'Ciudad eliminada.');
     }
+
 }
