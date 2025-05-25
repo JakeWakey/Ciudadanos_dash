@@ -2,14 +2,18 @@
 
 namespace App\Models;
 
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Citizen extends Model
 {
-    //
-    protected $fillable = ['name', 'city_id'];
-    public function city()
-    {
-        return $this->belongsTo(City::class);
+    use HasFactory;
+    
+    protected $fillable = ['name','city_id'];
+
+    public function city(): BelongsTo 
+    { 
+        return $this->belongsTo(City::class); 
     }
 }
