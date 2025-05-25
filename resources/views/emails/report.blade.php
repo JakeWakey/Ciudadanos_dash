@@ -1,12 +1,7 @@
 <x-mail::message>
-# Introduction
-
-The body of your message.
-
-<x-mail::button :url="''">
-Button Text
-</x-mail::button>
-
-Thanks,<br>
+    Reporte Diario
+    @foreach ($reportData as $line)
+    <p>{{$line }}</p>
+    @endforeach
 {{ config('app.name') }}
 </x-mail::message>

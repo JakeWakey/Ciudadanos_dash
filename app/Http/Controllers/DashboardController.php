@@ -13,8 +13,17 @@ class DashboardController extends Controller
     public function index() {
         $totalCities = City::count();
         $totalCitizens = Citizen::count();
+
         $citizensByCity = City::withCount('citizens')->orderBy('name')->get();
 
-        return view('dashboard', compact('totalCities', 'totalCitizens', 'citizensByCity'));
+        $citizensWithCity = Citizen::with('city')
+            ->get()
+            ->groupBy('city.name')
+            ->sortKeys()
+            ->map(function($group) {
+                return $group->sortBy('name');
+             });
+
+        return view('dashboard', compact('totalCities', 'totalCitizens', 'citizensByCity','citizensWithCity'));
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportCitizenController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Mail;
@@ -14,14 +15,9 @@ Route::get('/', function () {
 
 
 Route::middleware(['auth'])->group(function () {
-
     Route::resource('cities',   CityController::class);
     Route::resource('citizens', CitizenController::class);
-
-    Route::post('/send-report', function () {
-        Mail::to(auth()->user()->email)->send(new ReportMail);
-        return back()->with('success','Reporte enviado al correo.');
-    })->name('report.send');
+    Route::get("/send-report", [ReportCitizenController::class, 'send_report']);
 });
 
 
